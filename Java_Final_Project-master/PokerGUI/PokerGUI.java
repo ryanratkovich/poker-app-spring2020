@@ -189,23 +189,23 @@ class PokerFrame extends JFrame {
       d.shuffle();
 
       //DEAL CARDS TO PLAYER AND OPPONENT
-      p1.startCards[0] = d.deal();
-      p2.startCards[0] = d.deal();
 
-      p1.startCards[1] = d.deal();
-      p2.startCards[1] = d.deal();
+      Card [] p1Cards = {d.deal(), d.deal()};
+      Card [] p2Cards = {d.deal(), d.deal()};
 
+      p1.setStartCards(p1Cards);
+      p2.setStartCards(p2Cards);
 
       //DISPLAY PLAYER CARDS
       JLabel p1Card1 = new JLabel();
-      Image image = icons[p1.startCards[0].getID()].getImage();
+      Image image = icons[p1.getStartCards()[0].getID()].getImage();
       Image newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       ImageIcon imageIcon = new ImageIcon(newimg); 
       p1Card1.setIcon(imageIcon);
       playerPanel.add(p1Card1);
 
       JLabel p1Card2 = new JLabel();
-      image = icons[p1.startCards[1].getID()].getImage();
+      image = icons[p1.getStartCards()[1].getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
       p1Card2.setIcon(imageIcon);
@@ -214,7 +214,7 @@ class PokerFrame extends JFrame {
       //DISPLAY OPPONENT CARDS
       JLabel p2Card1 = new JLabel();
       //image = hiddenCard.getImage();
-      image = icons[p2.startCards[0].getID()].getImage();
+      image = icons[p2.getStartCards()[0].getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
       p2Card1.setIcon(imageIcon);
@@ -222,7 +222,7 @@ class PokerFrame extends JFrame {
 
       JLabel p2Card2 = new JLabel();
       //image = hiddenCard.getImage();
-      image = icons[p2.startCards[1].getID()].getImage();
+      image = icons[p2.getStartCards()[1].getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
       p2Card2.setIcon(imageIcon);
@@ -288,12 +288,9 @@ class PokerFrame extends JFrame {
       Card[] tableCards = {c1, c2, c3, c4, c5};
 
       p1.storeHands(tableCards, 5);
-      p1.chooseBestHand();
-
       p2.storeHands(tableCards, 5);
-      p2.chooseBestHand();
 
-      if (p1.getBestHand().compareTo(p2.getBestHand()) != 0){
+      if (p1.getBestHand().compareTo(p2.getBestHand()) == 1){
          add(new JTextField("   PLAYER 1 WON    "), BorderLayout.NORTH);
       } else {
          add(new JTextField("   PLAYER 2 WON    "), BorderLayout.NORTH); 

@@ -19,6 +19,12 @@ class Player {
 		startCards[0] = c[0];
 		startCards[1] = c[1];
 	}
+
+	public Card[] getStartCards(){
+		Card[] cards = {startCards[0], startCards[1]};
+		return cards;
+	}
+
 	//stores all of the possible hands into an array of hands
 	//used to find the best hand available to the player
 	public void storeHands(Card [] pool, int poolSize) {
@@ -44,6 +50,10 @@ class Player {
 	//returns all the possible hands
 	public Hand[] getHands() {
 		return allHands;
+	}
+
+	public double getCash() {
+		return cash;
 	}
 
 /////// HELPER FUNCTIONS ///////
