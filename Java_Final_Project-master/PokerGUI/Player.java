@@ -1,34 +1,26 @@
 import java.util.*;
-
-public class Player {
-
+class Player {
+	//stores the player's name (to be displayed in the game)
 	private String name;
-	public Card [] startCards = new Card[2];
-	public Hand[] allHands;
-	public Hand best;
-	public double cash;
+	//stores the player's two cards
+	private Card [] startCards = new Card[2];
+	//stores every possible hand that can be made from the player's two cards and the cards in the pool
+	private Hand [] allHands;
+	//stores the best of all hands
+	private Hand best;
+	private double cash;
 
+/////// CONSTRUCTORS & SETTER FUCNTIONS ///////
 	public Player(String n, int c) {
 		name = n;
 		cash = c;
 	}
-
-	public void chooseBestHand() {
-		int size = allHands.length;
-		best = allHands[0];
-		for(int i = 1; i < size; i++)
-			if(best.compareTo(allHands[i]) == -1)
-				best = allHands[i];
+	public void setStartCards(Card[] c) {
+		startCards[0] = c[0];
+		startCards[1] = c[1];
 	}
-
-	public Hand getBestHand() {
-		return best;
-	}
-
-	public double getCash() {
-		return cash;
-	}
-
+	//stores all of the possible hands into an array of hands
+	//used to find the best hand available to the player
 	public void storeHands(Card [] pool, int poolSize) {
 		int num = possibleHands(poolSize);
 		allHands = new Hand[num];
@@ -37,26 +29,41 @@ public class Player {
 		chooseFour(pool, poolSize, 0, n);
 		chooseThree(pool, poolSize, n, num);
 
+		findBestHand();
+
 		return;
 	}
-
-	public int possibleHands(int n) {
-		if(n == 3)		return 1;
-		else if(n == 4)	return 6;
-		else if(n == 5)	return 20;
-		else 			return 0;
+/////// ACCESSOR FUNCTIONS ///////
+	public String getName() {
+		return name;
 	}
-
+	//returns the best of all the possible hands available
+	public Hand getBestHand() {
+		return best;
+	}
+	//returns all the possible hands
 	public Hand[] getHands() {
 		return allHands;
 	}
 
-	public void startCards(Card[] c) {
-		startCards[0] = c[0];
-		startCards[1] = c[1];
+/////// HELPER FUNCTIONS ///////
+	//determines the best hand
+	private void findBestHand() {
+		int size = allHands.length;
+		best = allHands[0];
+		for(int i = 1; i < size; i++)
+			if(best.compareTo(allHands[i]) == -1)
+				best = allHands[i];
 	}
-
-	public void chooseThree(Card[] pool, int poolSize, int start, int end) {
+	//returns the number of possible hands that the player can find given the pool size
+	private int possibleHands(int poolSize) {
+		if(poolSize == 3)		return 1;
+		else if(poolSize == 4)	return 6;
+		else if(poolSize == 5)	return 20;
+		else 			return 0;
+	}
+	//creates all possible combinations of hands from BOTH of the player's two starting cards and THREE cards from the pool
+	private void chooseThree(Card[] pool, int poolSize, int start, int end) {
 		Card[] temp = new Card[5];
 		int index = 0, i = start;
 		while(i < end) {
@@ -78,8 +85,8 @@ public class Player {
 			index = 0;
 		}
 	}
-
-	public void chooseFour(Card[] pool, int poolSize, int start, int end) {
+	//creates all possible combinations of hands from ONE of the player's two starting cards and FOUR cards from the pool
+	private void chooseFour(Card[] pool, int poolSize, int start, int end) {
 		Card[] temp1 = new Card[5];
 		Card[] temp2 = new Card[5];
 
@@ -111,6 +118,6 @@ public class Player {
 			}
 			index1 = 0;
 		}
-	}
 
+	}
 }
