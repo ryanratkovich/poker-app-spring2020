@@ -6,8 +6,8 @@ class Card {
 		this.suit = s;
 	}
 	public String toString() {
-		String[] ranks = {null, null, "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
-		String[] suits = {"Clubs", "Diamonds", "Hearts", "Spades"};
+		String[] ranks = {null, null, "2 ", "3 ", "4 ", "5 ", "6 ", "7 ", "8 ", "9 ", "10", "J ", "Q ", "K ", "A "};
+		String[] suits = {" of Clubs", " of Diamonds", " of Hearts", " of Spades"};
 
 		return ranks[this.rank] + suits[this.suit];
 	}
@@ -22,10 +22,6 @@ class Card {
 			return -1;
 		else if(this.rank > c.rank)
 			return 1;
-		// else if(this.suit < c.suit)
-		// 	return -1;
-		// else if(this.suit > c.suit)
-		// 	return 1;
 		return 0;
 	}
 }

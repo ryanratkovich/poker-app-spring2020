@@ -4,6 +4,9 @@ class Hand {
 	int [] groups;
 	int [] kickers;
 	private final int size = 5;
+	public Hand() {
+
+	}
 	public Hand(Card[] h) {
 		this.hand = new Card[this.size];
 		this.groups = new int[size];
@@ -13,7 +16,7 @@ class Hand {
 			hand[i] = new Card(h[i].getRank(), h[i].getSuit());
 			groups[i] = 0;
 			kickers[i] = 0;
-		}
+		}		
 	}
 	public void sort() {
 		int i, j;
@@ -171,6 +174,7 @@ class Hand {
 		int i = size-1;
 		while(this.kickers[i] == h.kickers[i])  {
 			i--;
+			if(i < 0)	return 0;
 		}
 		return Integer.compare(this.kickers[i], h.kickers[i]);
 	}
