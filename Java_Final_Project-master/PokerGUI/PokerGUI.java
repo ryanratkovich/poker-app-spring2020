@@ -27,6 +27,10 @@ public class PokerGUI extends JFrame {
 }
 
 class PokerFrame extends JFrame {
+
+   //variable to check if game is being played
+   private Boolean playing;
+
    //create all JPanels to display
    private JPanel table = new JPanel();
    private JPanel opponentPanel = new JPanel();
@@ -125,14 +129,16 @@ class PokerFrame extends JFrame {
    private JButton call = new JButton("Call");
    private JButton raise = new JButton("Raise");
    private JButton fold = new JButton("Fold");
+   private JButton playAgain = new JButton("Play Again");
 
    public PokerFrame() {
 
       //SET UP GUI
       super( "Texas Hold'em" );
+      playing = true;   //game is being played
       Deck d = new Deck();
-      Player p1 = new Player("player 1", 5);
-      Player p2 = new Player("player 2", 5);
+      Player p1 = new Player("player 1", 10);
+      Player p2 = new Player("player 2", 10);
 
       table.setBorder(BorderFactory.createLineBorder(Color.black));
       table.setLayout(new GridLayout(3,1));
@@ -165,47 +171,10 @@ class PokerFrame extends JFrame {
 
       add(southPanel, BorderLayout.SOUTH); //add bottom panel
 
-      buttonPanel.setLayout(new GridLayout(1,4,0,0));
-
-      check.addActionListener( new ActionListener(){  
-            public void actionPerformed( ActionEvent event )
-            {
-
-            }
-         });
+      buttonPanel.setLayout(new GridLayout(1,5,0,0));
       buttonPanel.add(check);
-
-      call.addActionListener(
-         new ActionListener()
-         {  
-            public void actionPerformed( ActionEvent event )
-            {
-
-            }
-         }
-      );
       buttonPanel.add(call);
-
-      raise.addActionListener(
-         new ActionListener()
-         {  
-            public void actionPerformed( ActionEvent event )
-            {
-               //copyJList.setListData( colorJList.getSelectedValues() );
-            }
-         }
-      );
       buttonPanel.add(raise);
-
-      fold.addActionListener(
-         new ActionListener()
-         {  
-            public void actionPerformed( ActionEvent event )
-            {
-               //copyJList.setListData( colorJList.getSelectedValues() );
-            }
-         }
-      );
       buttonPanel.add(fold);
       southPanel.add(buttonPanel, BorderLayout.EAST); //add buttonPanel to southPanel
 
@@ -214,6 +183,7 @@ class PokerFrame extends JFrame {
       table.add(cardPanel);
       table.add(playerPanel);
 
+      do { //loop to play again
 
       //START GAME
       d.shuffle();
@@ -221,11 +191,12 @@ class PokerFrame extends JFrame {
       //DEAL CARDS TO PLAYER AND OPPONENT
       p1.startCards[0] = d.deal();
       p2.startCards[0] = d.deal();
+
       p1.startCards[1] = d.deal();
       p2.startCards[1] = d.deal();
 
 
-      //DISPLAY PLAYER AND OPPONENT CARDS
+      //DISPLAY PLAYER CARDS
       JLabel p1Card1 = new JLabel();
       Image image = icons[p1.startCards[0].getID()].getImage();
       Image newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
@@ -240,21 +211,22 @@ class PokerFrame extends JFrame {
       p1Card2.setIcon(imageIcon);
       playerPanel.add(p1Card2);
 
+      //DISPLAY OPPONENT CARDS
       JLabel p2Card1 = new JLabel();
-      image = hiddenCard.getImage();
+      //image = hiddenCard.getImage();
+      image = icons[p2.startCards[0].getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
       p2Card1.setIcon(imageIcon);
       opponentPanel.add(p2Card1);
 
       JLabel p2Card2 = new JLabel();
-      image = hiddenCard.getImage();
+      //image = hiddenCard.getImage();
+      image = icons[p2.startCards[1].getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
       p2Card2.setIcon(imageIcon);
       opponentPanel.add(p2Card2);
-
-
 
       //DEALER DEALS 3 CARDS
       Card c1 = d.deal();
@@ -283,6 +255,91 @@ class PokerFrame extends JFrame {
       deck3rdCard.setIcon(imageIcon);
       cardPanel.add(deck3rdCard);
 
+      //ROUND OF BETTING
 
+      //DEALER DEALS 4TH CARD
+
+      Card c4 = d.deal();
+
+      JLabel deck4thCard = new JLabel();
+      image = icons[c4.getID()].getImage();
+      newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+      imageIcon = new ImageIcon(newimg); 
+      deck4thCard.setIcon(imageIcon);
+      cardPanel.add(deck4thCard);
+
+      //ROUND OF BETTING
+
+      //DEALER DEALS 5TH CARD
+
+      Card c5 = d.deal();
+
+      JLabel deck5thCard = new JLabel();
+      image = icons[c5.getID()].getImage();
+      newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+      imageIcon = new ImageIcon(newimg); 
+      deck5thCard.setIcon(imageIcon);
+      cardPanel.add(deck5thCard);
+
+      //ROUND OF BETTING
+
+      //EVALUATE CARDS
+
+      Card[] tableCards = {c1, c2, c3, c4, c5};
+
+      p1.storeHands(tableCards, 5);
+      p1.chooseBestHand();
+
+      p2.storeHands(tableCards, 5);
+      p2.chooseBestHand();
+
+      if (p1.getBestHand().compareTo(p2.getBestHand()) != 0){
+         add(new JTextField("   PLAYER 1 WON    "), BorderLayout.NORTH);
+      } else {
+         add(new JTextField("   PLAYER 2 WON    "), BorderLayout.NORTH); 
+      }
+      buttonPanel.add(playAgain);
+      playing = false;
+
+      //REPEAT
+
+      } while (playing); // end do-while  loop
+
+      playAgain.addActionListener( new ActionListener(){  
+            public void actionPerformed( ActionEvent event )
+            {
+               playing = true;
+               getContentPane().invalidate();
+               getContentPane().validate();
+               getContentPane().repaint();
+            }
+         });
+      check.addActionListener( new ActionListener(){  
+            public void actionPerformed( ActionEvent event )
+            {
+
+            }
+         });
+      call.addActionListener( new ActionListener(){  
+            public void actionPerformed( ActionEvent event )
+            {
+
+            }
+         }
+      );
+      raise.addActionListener(new ActionListener(){  
+            public void actionPerformed( ActionEvent event )
+            {
+
+            }
+         }
+      );
+      fold.addActionListener(new ActionListener(){  
+            public void actionPerformed( ActionEvent event )
+            {
+
+            }
+         }
+      );
    }
 }
