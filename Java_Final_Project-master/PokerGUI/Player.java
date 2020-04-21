@@ -56,6 +56,10 @@ class Player {
 		return cash;
 	}
 
+	public void changeCash(double d){
+		cash += d;
+	}
+
 /////// HELPER FUNCTIONS ///////
 	//determines the best hand
 	private void findBestHand() {
