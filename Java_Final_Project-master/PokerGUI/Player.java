@@ -19,12 +19,6 @@ class Player {
 		startCards[0] = c[0];
 		startCards[1] = c[1];
 	}
-
-	public Card[] getStartCards(){
-		Card[] cards = {startCards[0], startCards[1]};
-		return cards;
-	}
-
 	//stores all of the possible hands into an array of hands
 	//used to find the best hand available to the player
 	public void storeHands(Card [] pool, int poolSize) {
@@ -39,7 +33,31 @@ class Player {
 
 		return;
 	}
+	public void bet(double bet) {
+		if(bet > cash)
+			return;
+		cash -= bet;
+	}
+	public void call(double call) {
+		if(call > cash)
+			return;
+		cash -= call;
+	}
+	public void raise(double raise) {
+		if(raise > cash)
+			return;
+		cash -= raise;
+	}
+
+	public void changeCash(double d){
+		cash += d;
+	}
 /////// ACCESSOR FUNCTIONS ///////
+	public Card[] getStartCards(){
+		Card[] cards = {startCards[0], startCards[1]};
+		return cards;
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -51,13 +69,8 @@ class Player {
 	public Hand[] getHands() {
 		return allHands;
 	}
-
 	public double getCash() {
 		return cash;
-	}
-
-	public void changeCash(double d){
-		cash += d;
 	}
 
 /////// HELPER FUNCTIONS ///////
