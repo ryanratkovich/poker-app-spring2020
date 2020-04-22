@@ -2,20 +2,92 @@ import java.util.*;
 
 public class Hand {
 	public Card [] hand;
-	public int [] groups;
-	public int [] kickers;
+	public int [] val;
 	private final int size = 5;
 
 	public Hand(Card[] h) {
 		this.hand = new Card[this.size];
-		this.groups = new int[size];
-		this.kickers = new int[size];
+		this.val = new int[6];
 
-		for(int i = 0; i < this.size; i++) {
-			hand[i] = new Card(h[i].getRank(), h[i].getSuit());
-			groups[i] = 0;
-			kickers[i] = 0;
-		}		
+		for(int i = 0; i < this.size; i++)
+			hand[i] = new Card(h[i].getRank(), h[i].getSuit());	
+
+		this.sort();
+		int[] ranks = new int[15];
+
+		for(int i = 0; i < 15; i++)
+			ranks[i] = 0;
+		for(int i = 0; i < size; i++)
+			ranks[hand[i].getRank()]++;
+
+		int group1 = 1, group2 = 1;
+		int small = 0, large = 0;
+
+		for(int i = 14; i > 0; i--) {
+			if(ranks[i] > group1) {
+				if(group1 != 1) {
+					group2 = group1;
+					small = large;
+				}
+				group1 = ranks[i];
+				large = i;
+			}
+			else if(ranks[i] > group2) {
+				group2 = ranks[i];
+				small = i;
+			}
+		}
+
+		int[] priority = new int[5];
+		int index = 0;
+		for(int i = 14; i >= 2; i--)
+			if(ranks[i] == 1)
+				priority[index] = i;
+
+		if(group1 == 1) {
+			val[0] = 1;
+			for(int i = 1; i < 6; i++)
+				val[i] = priority[i-1];
+		}
+		if(group1 == 2 && group2 == 1) {
+			val[0] = 2;
+			val[1] = large;
+			val[2] = priority[0];
+			val[3] = priority[1];
+			val[4] = priority[2];
+		}
+		if(group1 == 2 && group2 == 2) {
+			val[0] = 3;
+			val[1] = large > small ? large : small;
+			val[2] = large < small ? large : small;
+			val[3] = priority[0];
+		}
+		if(group1 == 3 && group2 != 2) {
+			val[0] = 4;
+		}
+		if(this.straight()) {
+			val[0] = 5;
+			val[1] = priority[0];
+		}
+		if(this.flush()) {
+			val[0] = 6;
+			for(int i = 1; i < 6; i++)
+				val[i] = priority[i-1];
+		}
+		if(group1 == 3 && group2 == 2) {
+			val[0] = 7;
+			val[1] = large;
+			val[2] = small;
+		}
+		if(group1 == 4) {
+			val[0] = 8;
+			val[1] = large;
+			val[2] = priority[0];
+		}
+		if(this.straight() && this.flush()) {
+			val[0] = 9;
+			val[1] = priority[0];
+		}	
 	}
 
 	public void sort() {
@@ -30,81 +102,15 @@ public class Hand {
 			}
 			hand[j+1] = key;
 		}
+
 	}
 
-	public void print() {
+	public String print() {
+		StringBuilder s = new StringBuilder();
 		for(int i = 0; i < size; i++)
-			System.out.println(hand[i]);
-	}
-
-	public int evaluate() {
-		this.sort();
-		int handValue = this.hasGroup();
-
-		if(handValue != 1)			
-			return handValue;
-
-		if(this.straight() && this.flush()) {
-			if(hand[size-1].getRank() == 14)
-				return 10;
-			else
-				return 9;
-		}
-
-		else if(this.flush())		return 6;
-		else if(this.straight()) 	return 5;
-
-		return 1;
-	}
-
-	//return group value (pairs, three of a kind, etc.)
-	public int hasGroup() {
-		int[] ranks = new int[15];
-		//group 1 and 2
-		int g1 = 0, g2 = 0;
-		for(int i = 0; i < 15; i++)
-			ranks[i] = 0;
-
-		for(int i = 0; i < size; i++) {
-			int curr = hand[i].getRank();
-			++ranks[curr];
-			if(ranks[curr] > g1) {
-				g1 = ranks[curr];
-				groups[g1] = curr;
-			}
-			else if(ranks[curr] > g2) {
-				g2 = ranks[curr];
-				if(g2 == g1)
-					groups[0] = curr;
-				else
-					groups[g2] = curr;
-			}
-		}
-		for(int i = 14, j = size-1; i >= 0; i--) {
-			if(ranks[i] == 1) {
-				kickers[j] = i;
-				if(--j < 0)	
-					break;
-			}
-
-		}
-
-		int g = g1 + g2;
-		switch(g) {
-			case 2:
-				return 1;
-			case 3:
-				return 2;
-			case 4:
-				if(g1 == 2)
-					return 3;
-				return 4;
-			case 5:
-				if(g1 == 2 || g1 == 3)
-					return 7;
-				return 8;
-		}
-		return 0;
+			s.append(hand[i].toString() + "\n");
+		// 	System.out.println(hand[i]);
+		return s.toString();
 	}
 
 	public boolean straight() {
@@ -123,73 +129,18 @@ public class Hand {
 	}
 
 	public int compareTo(Hand h) {
-		int thisValue = this.evaluate();
-		int hValue = h.evaluate();
-
-		if(thisValue < hValue)	return -1;
-		if(thisValue > hValue)	return 1;
-
-		switch(thisValue) {
-			case 2:
-				if(this.groups[2] > h.groups[2])		return 1;
-				else if(this.groups[2] < h.groups[2])	return -1;
-				return this.kickerComp(h);
-
-			case 3:
-				int firstP = this.groups[0], secondP = this.groups[2];
-				int hfirstP = h.groups[0], hsecondP = h.groups[2];
-
-				int thisMin = firstP < secondP ? firstP : secondP;
-				int thisMax = thisMin == firstP ? secondP : firstP;
-				int hMin = hfirstP < hsecondP ? hfirstP : hsecondP;
-				int hMax = hMin == hfirstP ? hsecondP : hfirstP;
-
-				if(thisMax < hMax)			return -1;
-				else if(thisMax > hMax)		return 1;
-				else if(thisMin < hMin)		return -1;
-				else if(thisMin > hMin)		return 1;
-				return this.kickerComp(h);
-
-			case 4:
-				if(this.groups[3] > h.groups[3])		return 1;
-				else if(this.groups[3] < h.groups[3])	return -1;
-				return this.kickerComp(h);
-
-			case 7:
-				int pair = this.groups[0], triple = this.groups[3];
-				int hpair = h.groups[0], htriple = h.groups[3];
-
-				if(triple < htriple)		return -1;
-				else if(triple > htriple)	return 1;
-				else if(pair < hpair)		return -1;
-				else if(pair > hpair)		return 1;
-				return 0;
-
-			case 8:
-				int four = this.groups[4], hfour = h.groups[4];
-				if(four < hfour)			return -1;
-				else if(four > hfour)		return 1;
-				return this.kickerComp(h);
-
-			default:
-				return this.kickerComp(h);
+		for(int i = 0; i < 6; i++) {
+			if(this.val[i] > h.val[i])
+				return 1;
+			else if(this.val[i] != h.val[i])
+				return -1;
 		}
-	}
-
-	public int kickerComp(Hand h) {
-		int i = size-1;
-		while(this.kickers[i] == h.kickers[i])  {
-			i--;
-			if(i < 0)	return 0;
-		}
-		return Integer.compare(this.kickers[i], h.kickers[i]);
+		return 0;
 	}
 
 	public String toString() {
-		int val = evaluate();
-		sort();
-		switch(val) {
-			case 1:		return "High Card " + hand[4].toString();
+		switch(val[0]) {
+			case 1:		return "High Card";
 			case 2:		return "Pair";
 			case 3:		return "Two Pair";
 			case 4:		return "Three of a Kind";
@@ -197,8 +148,11 @@ public class Hand {
 			case 6:		return "Flush";
 			case 7:		return "Full House";
 			case 8:		return "Four of a Kind";
-			case 9:		return "Straight Flush";
-			case 10:	return "...a Royal Flush??!!??!!";
+			case 9:		
+						if(val[1] < 14) 
+							return "Straight Flush";
+						else
+							return "...a Royal Flush??!!??!!";
 		}
 		return "";
 	}
