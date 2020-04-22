@@ -2,6 +2,8 @@ LOOP:
 	Create deck and shuffle;
 	Deal the cards to the players and the first three to the table;
 
+	-----------------------------------------------------------------DONE
+
 	POKER.BETTING_ROUND(p1, p2); //function to bet
 
 	if(player1.FOLD == TRUE)
@@ -12,6 +14,8 @@ LOOP:
 		player1 wins (display this)
 		Give pool money to the winner
 		CONTINUE;
+
+	-----------------------------------------------------------------
 
 	Deal 4th card to table;
 

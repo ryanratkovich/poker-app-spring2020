@@ -3,7 +3,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 public class PokerGUI extends JFrame {
-   public static void main(String args[]) { 
+   public static void main(String args[]){ 
       PokerFrame pokerFrame = new PokerFrame(); 
       pokerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       pokerFrame.setSize(800, 500);
@@ -11,10 +11,14 @@ public class PokerGUI extends JFrame {
    }
 }
 
-class PokerFrame extends JFrame {
+class PokerFrame extends JFrame{
 
    //boolean variables for game logic
    private Boolean playing;
+
+   private Boolean firstRound;
+   private Boolean secondRound;
+   private Boolean finalRound;
 
    private Boolean p1Turn;
    private Boolean p1hasChecked;
@@ -29,24 +33,28 @@ class PokerFrame extends JFrame {
    private Boolean p2hasFolded;
 
    //JTextField to display messages to players
-   private JTextField messageBox;
+   private JTextArea messageBox;
 
-   //create all JPanels to display
+   //create all JPanels for each part of table
    private JPanel table = new JPanel();
    private JPanel opponentPanel = new JPanel();
    private JPanel cardPanel= new JPanel();
    private JPanel playerPanel= new JPanel();
 
-   //create JLabels to portray cards
+   //JLabels to portray player 2 cards
    private JLabel[] opponentCards;
    private JTextField opponentCash;
+
+   //JLabels to portray table cards
    private JLabel[] deckCards;
    private JTextField pot;
    private double potAmount;
+
+   //JLabels to portray player 1 cards
    private JLabel[] playerCards;
    private JTextField playerCash;
 
-   //create arrays for cards
+   //array to access card image files
    private String files[] = {
       "2C.png", "2D.png", "2H.png", "2S.png",
       "3C.png", "3D.png", "3H.png", "3S.png",
@@ -63,7 +71,7 @@ class PokerFrame extends JFrame {
       "AC.png", "AD.png", "AH.png", "AS.png"
    };
 
-   //card to hide opponent cards
+   //card to hide cards from players
    private ImageIcon hiddenCard = new ImageIcon(getClass().getResource("gray_back.png"));
 
    //array to hold images of cards
@@ -122,13 +130,13 @@ class PokerFrame extends JFrame {
       new ImageIcon(getClass().getResource(files[51]))
    };
 
-   private JPanel southPanel = new JPanel(); //to hold p1ButtonPanel
+   private JPanel southPanel = new JPanel(); //panel to hold player 1's button panel
    private JPanel p1ButtonPanel = new JPanel();
 
-   private JPanel northPanel = new JPanel(); //to hold p2ButtonPanel
+   private JPanel northPanel = new JPanel(); //panel to hold player 2's button panel
    private JPanel p2ButtonPanel = new JPanel();
 
-   //create the buttons for buttonPanel
+   //buttons for buttonPanels
    private JButton p1Check = new JButton("Check");
    private JButton p1Call = new JButton("Call");
    private JButton p1Raise = new JButton("Raise");
@@ -139,20 +147,26 @@ class PokerFrame extends JFrame {
    private JButton p2Raise = new JButton("Raise");
    private JButton p2Fold = new JButton("Fold");
 
-   private JButton playAgain = new JButton("Play Again");
+   //button to play again
+   //private JButton playAgain = new JButton("Play Again");
+
+   //create players
+   private Player p1;
+   private Player p2;
 
    public PokerFrame() {
-
-      //SET UP GUI
       super( "Texas Hold'em" );
+
       playing = true;   //game is being played
+      firstRound = true;   //first round
+
       Deck d = new Deck();
-      Player p1 = new Player("player 1", 10);
-      Player p2 = new Player("player 2", 10);
+      p1 = new Player("player 1", 10);
+      p2 = new Player("player 2", 10);
 
-      potAmount = 0;
+      potAmount = 0; //pot is intially 0
 
-      p1Turn = true;
+      //initialze game logic booleans
       p1hasChecked = false;
       p1hasCalled = false;
       p1hasRaised = false;
@@ -164,10 +178,10 @@ class PokerFrame extends JFrame {
       p2hasRaised = false;
       p2hasFolded = false;
 
-      Clicklistener click= new Clicklistener();
-   
+      //SET UP OF GUI
 
-      messageBox = new JTextField("Welcome to Texas Hold'em!");
+      messageBox = new JTextArea("Welcome to Texas Hold'em!", 10, 10);
+      messageBox.setLineWrap(true);
       add(messageBox, BorderLayout.EAST);
 
       table.setBorder(BorderFactory.createLineBorder(Color.black));
@@ -208,11 +222,12 @@ class PokerFrame extends JFrame {
       p1ButtonPanel.setLayout(new GridLayout(1,5,0,0));
       p2ButtonPanel.setLayout(new GridLayout(1,5,0,0));
 
-      //add buttons to buttonPanel
+      //add buttons to both players button panels
       p1ButtonPanel.add(p1Check);
       p1ButtonPanel.add(p1Call);
       p1ButtonPanel.add(p1Raise);
       p1ButtonPanel.add(p1Fold);
+      //p1ButtonPanel.add(playAgain);
       southPanel.add(p1ButtonPanel, BorderLayout.EAST); //add p1ButtonPanel to southPanel
 
       p2ButtonPanel.add(p2Check);
@@ -226,9 +241,8 @@ class PokerFrame extends JFrame {
       table.add(cardPanel);
       table.add(playerPanel);
 
-      messageBox.setText("The game has begun!");
-
       //START GAME
+
       d.shuffle();
 
       //DEAL CARDS TO PLAYER AND OPPONENT
@@ -328,6 +342,10 @@ class PokerFrame extends JFrame {
       Card c2 = d.deal();
       Card c3 = d.deal();
 
+      //GET NEXT RIVER CARDS BUT HIDE THEM
+      Card c4 = d.deal();
+      Card c5 = d.deal();
+
       //DISPLAY THE FLOP
       JLabel deck1stCard = new JLabel();                                                 //DISPLAY 1ST CARD
       image = icons[c1.getID()].getImage();
@@ -350,160 +368,346 @@ class PokerFrame extends JFrame {
       deck3rdCard.setIcon(imageIcon);
       cardPanel.add(deck3rdCard);
 
-      //P1 STARTS BETTING
-
-      if (p1Turn){   //p1 conditional
-         p1Check.addActionListener(click);
-         p1Raise.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               messageBox.setText("Player 1 raises $0.50.");
-               p1hasRaised = true;
-               p1.changeCash(-0.5);
-               potAmount += 0.5;
-               p2Turn = true;
-            }
-         });
-         p1Fold.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-               messageBox.setText("Player 1 folds. Player 2 wins the hand.");
-               p1hasFolded = true;
-               p2Turn = true;
-            }
-         });
-         messageBox.setText("Player 1 GO");
-         if (p1hasFolded){
-            p2.changeCash(potAmount);
-            messageBox.setText("Game Over.");
-         }
-         p1hasChecked = false;
-         p1hasCalled = false;
-         p1hasRaised = false;
-         p1hasFolded = false;
-         p1Turn = false;
-
-         if (p2Turn){ //p2 conditional
-            messageBox.setText("Player 2 GO");
-            p2Check.addActionListener(new ActionListener() {
-               public void actionPerformed(ActionEvent e) {
-                  messageBox.setText("Player 2 checks.");
-               }
-            });
-            p2Call.addActionListener(new ActionListener() {
-               public void actionPerformed(ActionEvent e) {
-                  messageBox.setText("Player 2 calls Player 1's raise.");
-                  p2hasCalled = true;
-                  p2.changeCash(-0.5);
-                  potAmount += 0.5;
-               }
-            });
-            p2Raise.addActionListener(new ActionListener() {
-               public void actionPerformed(ActionEvent e) {
-                  messageBox.setText("Player 2 raises $1.");
-                  p2hasRaised = true;
-                  p2.changeCash(-1);
-                  potAmount += 1;
-               }
-            });
-            p2Fold.addActionListener(new ActionListener() {
-               public void actionPerformed(ActionEvent e) {
-                  messageBox.setText("Player 2 folds. Player 1 wins the hand.");
-                  p2hasFolded = true;
-               }
-            });
-            if (p2hasFolded){
-               playing = false;
-               p2.changeCash(potAmount);
-            }
-            p2hasChecked = false;
-            p2hasCalled = false;
-            p2hasRaised = false;
-            p2hasFolded = false;
-         } //end p2 conditional
-
-      } //end p1 conditional
-
-
-   
-
-
-      //P2 TAKES TURN
-
-
-      //DEALER DEALS 4TH CARD
-
-      messageBox.setText("Time for the River!");
-
-      Card c4 = d.deal();
+      //RIVER CARDS (HIDDEN INITIALLY)
 
       JLabel deck4thCard = new JLabel();
       image = icons[c4.getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
       deck4thCard.setIcon(imageIcon);
+      deck4thCard.setVisible(false);
       cardPanel.add(deck4thCard);
-
-      //ROUND OF BETTING
-
-      //DEALER DEALS 5TH CARD
-
-      Card c5 = d.deal();
 
       JLabel deck5thCard = new JLabel();
       image = icons[c5.getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
       deck5thCard.setIcon(imageIcon);
+      deck5thCard.setVisible(false);
       cardPanel.add(deck5thCard);
 
-      //ROUND OF BETTING
-
-      //EVALUATE CARDS
+      //CARD EVALUATION
 
       Card[] tableCards = {c1, c2, c3, c4, c5};
 
       p1.storeHands(tableCards, 5);
       p2.storeHands(tableCards, 5);
 
-      if (p1.getBestHand().compareTo(p2.getBestHand()) == 1){
-         add(new JTextField("   PLAYER 1 WON    "), BorderLayout.EAST);
-      } else {
-         add(new JTextField("   PLAYER 2 WON    "), BorderLayout.EAST); 
-      }
-      p1ButtonPanel.add(playAgain);
-      playing = false;
+      messageBox.setText("Player 1 GO");
+
+      p1Check.addActionListener(new ActionListener(){
+         public void actionPerformed(ActionEvent e){
+            if (e.getSource() == p1Check && playing && firstRound) {
+               messageBox.setText("Player 1 checks.");
+               p1.bet(0.5);
+               playerCash.setText("$  " + p1.getCash());
+               p2Turn = true;
+            } else if (e.getSource() == p1Check && playing && secondRound){
+               messageBox.setText("Player 1 checks.");
+               p1.bet(0.5);
+               playerCash.setText("$  " + p1.getCash());
+               p2Turn = true;
+            } else if (e.getSource() == p1Check && playing && finalRound){
+               messageBox.setText("Player 1 checks.");
+               p1.bet(0.5);
+               playerCash.setText("$  " + p1.getCash());
+               p2Turn = true;
+            }
+         }
+      });
+
+   //    p1Raise.addActionListener(new ActionListener(){
+   //       public void actionPerformed(ActionEvent e){
+   //          if (e.getSource() == p1Raise) {
+   //             messageBox.setText("Player 1 raises $0.50.");
+   //             p1hasRaised = true;
+   //             p1.raise(-0.5);
+   //             potAmount += 0.5;
+   //             p2Turn = true;
+   //          }
+   //       }
+   //    });
+   //    p1Call.addActionListener(new ActionListener(){
+   //       public void actionPerformed(ActionEvent e){
+   //          if (e.getSource() == p1Call) {
+   //             messageBox.setText("Player 1 calls for $0.50.");
+   //             p1hasRaised = true;
+   //             p1.call(-0.5);
+   //             potAmount += 0.5;
+   //             p2Turn = true;
+   //          }
+   //       }
+   //    });
+      p1Fold.addActionListener(new ActionListener(){
+         public void actionPerformed(ActionEvent e){
+            if (e.getSource() == p1Fold) {
+               p1hasFolded = true;
+               p2Turn = true;
+               if (p1hasFolded){
+                  p2.changeCash(potAmount);
+                  potAmount = 0;
+                  opponentCash.setText("$  " + p2.getCash());
+                  pot.setText("$  " + potAmount);
+                  messageBox.setText("Player 1 folds.\nGame Over.\nPlayer 2 wins the hand.\n");
+                  playing = false;
+                  firstRound = false;
+                  secondRound = false;
+                  finalRound = false;
+               }
+            }
+         }
+      });
+      // playAgain.addActionListener(new ActionListener(){
+      //    public void actionPerformed(ActionEvent e){
+      //       if (e.getSource() == playAgain) {
+      //          messageBox.setText("Player 1 GO");
+      //          playing = true;
+      //       }
+      //    }
+      // });
+      p2Check.addActionListener(new ActionListener(){
+                  public void actionPerformed(ActionEvent e){
+                     if (e.getSource() == p2Check && playing && p2Turn && firstRound) {
+                        messageBox.setText("Player 2 GO");
+                        p2.bet(0.5);
+                        opponentCash.setText("$  " + p2.getCash());
+                        potAmount += 1;
+                        pot.setText("$  " + potAmount);
+
+                        messageBox.setText("Dealer deals 4th card.");
+                        deck4thCard.setVisible(true);
+                        p2Turn = false;
+                        firstRound = false;
+                        secondRound = true;
+                     } else if (e.getSource() == p2Check && playing && p2Turn && secondRound){
+                        messageBox.setText("Player 2 GO");
+                        p2.bet(0.5);
+                        opponentCash.setText("$  " + p2.getCash());
+                        potAmount += 1;
+                        pot.setText("$  " + potAmount);
+
+                        messageBox.setText("Dealer deals 5th card.");
+                        deck5thCard.setVisible(true);
+                        p2Turn = false;
+                        secondRound = false;
+                        finalRound = true;
+                     } else if (e.getSource() == p2Check && playing && p2Turn && finalRound){
+                        messageBox.setText("Player 2 GO");
+                        p2.bet(0.5);
+                        opponentCash.setText("$  " + p2.getCash());
+                        potAmount += 1;
+                        pot.setText("$  " + potAmount);
+
+                        if (p1.getBestHand().compareTo(p2.getBestHand()) == 1){
+                           messageBox.setText("PLAYER 1 WON!");
+                           p1.changeCash(potAmount);
+                        } else {
+                           messageBox.setText("PLAYER 2 WON!");
+                           p2.changeCash(potAmount);
+                        }
+                        potAmount = 0;
+                        opponentCash.setText("$  " + p2.getCash());
+                        playerCash.setText("$  " + p1.getCash());
+                        pot.setText("$  " + potAmount);
+                        playing = false;
+                        p2Turn = false;
+                        finalRound = false;;
+                     }
+      }});
+
+   //    p2Check.addActionListener(new ActionListener(){
+   //       public void actionPerformed(ActionEvent e){
+   //          if (e.getSource() == p2Check) {
+   //             messageBox.setText("Player 2 checks.");
+   //             p2Turn = true;
+   //          }
+   //       }
+   //    });
+   //    p2Raise.addActionListener(new ActionListener(){
+   //       public void actionPerformed(ActionEvent e){
+   //          if (e.getSource() == p2Raise) {
+   //             messageBox.setText("Player 2 raises $0.50.");
+   //             p2hasRaised = true;
+   //             p2.changeCash(-0.5);
+   //             potAmount += 0.5;
+   //             p2Turn = false;
+   //          }
+   //       }
+   //    });
+   //    p2Call.addActionListener(new ActionListener(){
+   //       public void actionPerformed(ActionEvent e){
+   //          if (e.getSource() == p2Call) {
+   //             messageBox.setText("Player 2 calls Player 1's raise.");
+   //             p2hasCalled = true;
+   //             p2.changeCash(-0.5);
+   //             potAmount += 0.5;
+   //             p2Turn = false;
+   //          }
+   //       }
+   //    });
+   //    p2Fold.addActionListener(new ActionListener(){
+   //       public void actionPerformed(ActionEvent e){
+   //          if (e.getSource() == p2Fold) {
+   //             messageBox.setText("Player 2 folds. Player 1 wins the hand.");
+   //             p2hasFolded = true;
+   //             p2Turn = false;
+   //             if (p2hasFolded){
+   //                playing = false;
+   //                p2.changeCash(potAmount);
+   //                break;
+   //             }
+   //          }
+   //       }
+   //    });
+
+
+
+   //    //P1 STARTS
+   //    while (true){
+   //       messageBox.setText("Player 1 GO");
+   //       if (p1hasFolded){
+   //          p2.changeCash(potAmount);
+   //          messageBox.setText("Game Over.");
+   //          break;
+   //       }
+   //       p1hasChecked = false;
+   //       p1hasCalled = false;
+   //       p1hasRaised = false;
+   //       p1hasFolded = false;
+
+   //       if (p2Turn){  //P2 GOES
+   //          while (true){
+   //             messageBox.setText("Player 2 GO");
+   //             if (p2hasFolded){
+   //                playing = false;
+   //                p2.changeCash(potAmount);
+   //                break;
+   //             }
+   //             p2hasChecked = false;
+   //             p2hasCalled = false;
+   //             p2hasRaised = false;
+   //             p2hasFolded = false;
+
+   //             if (!p2Turn){ //DEALER DEALS 4TH CARD
+   //                messageBox.setText("Time for the River!");
+
+   //                Card c4 = d.deal();
+
+   //                JLabel deck4thCard = new JLabel();
+   //                image = icons[c4.getID()].getImage();
+   //                newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+   //                imageIcon = new ImageIcon(newimg); 
+   //                deck4thCard.setIcon(imageIcon);
+   //                cardPanel.add(deck4thCard);
+
+   //                while (true){  //P1 GOES
+   //                   messageBox.setText("Player 1 GO");
+   //                   if (p1hasFolded){
+   //                      p2.changeCash(potAmount);
+   //                      messageBox.setText("Game Over.");
+   //                      break;
+   //                   }
+   //                   p1hasChecked = false;
+   //                   p1hasCalled = false;
+   //                   p1hasRaised = false;
+   //                   p1hasFolded = false;
+
+   //                   if (p2Turn){   //P2 GOES
+   //                      while (true){
+   //                         messageBox.setText("Player 2 GO");
+   //                         if (p2hasFolded){
+   //                            playing = false;
+   //                            p2.changeCash(potAmount);
+   //                            break;
+   //                         }
+   //                         p2hasChecked = false;
+   //                         p2hasCalled = false;
+   //                         p2hasRaised = false;
+   //                         p2hasFolded = false;
+
+   //                         if (!p2Turn){
+   //                            messageBox.setText("Final card is on the table!");
+
+   //                            Card c5 = d.deal();
+
+   //                            JLabel deck5thCard = new JLabel();
+   //                            image = icons[c5.getID()].getImage();
+   //                            newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+   //                            imageIcon = new ImageIcon(newimg); 
+   //                            deck5thCard.setIcon(imageIcon);
+   //                            cardPanel.add(deck5thCard);
+
+   //                            while (true){  //P1 GOES - FINAL ROUND OF BETTING
+   //                               messageBox.setText("Player 1 GO");
+   //                               if (p1hasFolded){
+   //                                  p2.changeCash(potAmount);
+   //                                  messageBox.setText("Game Over.");
+   //                                  break;
+   //                               }
+   //                               p1hasChecked = false;
+   //                               p1hasCalled = false;
+   //                               p1hasRaised = false;
+   //                               p1hasFolded = false;
+
+   //                               if (p2Turn){
+   //                                  while (true){
+   //                                     messageBox.setText("Player 2 GO");
+   //                                     if (p2hasFolded){
+   //                                        playing = false;
+   //                                        p2.changeCash(potAmount);
+   //                                        break;
+   //                                     }
+   //                                     p2hasChecked = false;
+   //                                     p2hasCalled = false;
+   //                                     p2hasRaised = false;
+   //                                     p2hasFolded = false;
+
+   //                                     if (!p2Turn){
+   //                                        messageBox.setText("Show your hands!");
+
+   //                                        image = icons[p1.getStartCards()[0].getID()].getImage();
+   //                                        newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+   //                                        imageIcon = new ImageIcon(newimg); 
+   //                                        p1Card1.setIcon(imageIcon);
+
+   //                                        image = icons[p1.getStartCards()[1].getID()].getImage();
+   //                                        newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+   //                                        imageIcon = new ImageIcon(newimg); 
+   //                                        p1Card2.setIcon(imageIcon);
+
+   //                                        image = icons[p2.getStartCards()[0].getID()].getImage();
+   //                                        newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+   //                                        imageIcon = new ImageIcon(newimg); 
+   //                                        p2Card1.setIcon(imageIcon);
+
+   //                                        image = icons[p2.getStartCards()[1].getID()].getImage();
+   //                                        newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+   //                                        imageIcon = new ImageIcon(newimg); 
+   //                                        p2Card2.setIcon(imageIcon);
+
+   //                                        Card[] tableCards = {c1, c2, c3, c4, c5};
+
+   //                                        p1.storeHands(tableCards, 5);
+   //                                        p2.storeHands(tableCards, 5);
+
+   //                                        if (p1.getBestHand().compareTo(p2.getBestHand()) == 1){
+   //                                           add(new JTextField("   PLAYER 1 WON    "), BorderLayout.EAST);
+   //                                        } else {
+   //                                           add(new JTextField("   PLAYER 2 WON    "), BorderLayout.EAST); 
+   //                                        }
+   //                                        p1ButtonPanel.add(playAgain);
+   //                                        playing = false;
+   //                                     }
+   //                                  }
+   //                               }
+   //                            }
+   //                         }
+   //                      }
+   //                   }
+   //                }
+   //             }
+   //          }
+   //       }
+   //    }
    }
-
-   private class Clicklistener implements ActionListener
-   {
-      public void actionPerformed(ActionEvent e){
-         if (e.getSource() == p1Check) {
-            messageBox.setText("Player 1 checks.");
-            p2Turn = true;
-         }
-         if (e.getSource() == p1Call) {
-            
-         }
-         if (e.getSource() == p1Raise) {
-            
-         }
-         if (e.getSource() == p1Fold) {
-            
-         }
-         if (e.getSource() == p2Check) {
-            
-         }
-         if (e.getSource() == p2Call) {
-            
-         }
-         if (e.getSource() == p2Raise) {
-            
-         }
-         if (e.getSource() == p2Fold) {
-            
-         }
-      }
-   }
-
-
-
-}
+} //end class
