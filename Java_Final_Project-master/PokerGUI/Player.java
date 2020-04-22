@@ -38,16 +38,6 @@ class Player {
 			return;
 		cash -= bet;
 	}
-	public void call(double call) {
-		if(call > cash)
-			return;
-		cash -= call;
-	}
-	public void raise(double raise) {
-		if(raise > cash)
-			return;
-		cash -= raise;
-	}
 
 	public void changeCash(double d){
 		cash += d;
