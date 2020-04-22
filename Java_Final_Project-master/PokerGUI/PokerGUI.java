@@ -494,9 +494,15 @@ class PokerFrame extends JFrame{
                         if (p1.getBestHand().compareTo(p2.getBestHand()) == 1){
                            messageBox.setText("PLAYER 1 WON with a " + p1.getBestHand() + "!");
                            p1.changeCash(potAmount);
-                        } else {
+                        }
+                        else if(p1.getBestHand().compareTo(p2.getBestHand()) == -1) {
                            messageBox.setText("PLAYER 2 WON with a " + p1.getBestHand() + "!");
                            p2.changeCash(potAmount);
+                        }
+                        else {
+                           messageBox.setText("It's a draw!");
+                           p1.changeCash(potAmount/2);
+                           p2.changeCash(potAmount/2);
                         }
                         potAmount = 0;
                         opponentCash.setText("$  " + p2.getCash());
