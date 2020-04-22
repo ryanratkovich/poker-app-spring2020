@@ -185,6 +185,25 @@ public class Hand {
 		return Integer.compare(this.kickers[i], h.kickers[i]);
 	}
 
+	public String toString() {
+		int val = evaluate();
+		sort();
+		switch(val) {
+			case 1:		return "High Card " + hand[4].toString();
+			case 2:		return "Pair";
+			case 3:		return "Two Pair";
+			case 4:		return "Three of a Kind";
+			case 5:		return "Straight";
+			case 6:		return "Flush";
+			case 7:		return "Full House";
+			case 8:		return "Four of a Kind";
+			case 9:		return "Straight Flush";
+			case 10:	return "...a Royal Flush??!!??!!";
+		}
+
+		return ranks[this.rank] + suits[this.suit];
+	}
+
 }
 	/*
 		NOTE: 	1 = HighCard
