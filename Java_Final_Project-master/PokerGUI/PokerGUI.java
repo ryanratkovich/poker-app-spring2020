@@ -32,6 +32,8 @@ class PokerFrame extends JFrame{
    private Boolean p2hasRaised;
    private Boolean p2hasFolded;
 
+   private Boolean raising;
+
    //JTextField to display messages to players
    private JTextArea messageBox;
 
@@ -125,6 +127,8 @@ class PokerFrame extends JFrame{
       p2hasCalled = false;
       p2hasRaised = false;
       p2hasFolded = false;
+
+      raising = false;
 
       //SET UP OF GUI
 
@@ -353,37 +357,58 @@ class PokerFrame extends JFrame{
 
       p1Check.addActionListener(new ActionListener(){
          public void actionPerformed(ActionEvent e){
-            if (e.getSource() == p1Check && playing && p2hasRaised) {
+            if (e.getSource() == p1Check && playing && p2hasRaised && !p2Turn) {
                messageBox.setText("Player 1 must call Player 2's raise or fold.");
-            } else if (e.getSource() == p1Check && playing && firstRound){
+            } else if (e.getSource() == p1Check && playing && p2hasCalled && !p2Turn){
+            	messageBox.setText("Player 1 checks.");
+            	p2hasCalled = false;
+            	p2Turn = true;
+            } else if (e.getSource() == p1Check && playing && firstRound && !p2Turn){
                messageBox.setText("Player 1 checks.");
                p1.bet(0.5);
                potAmount += 0.5;
                pot.setText("$  " + potAmount);
                playerCash.setText("$  " + p1.getCash());
                p2Turn = true;
-            } else if (e.getSource() == p1Check && playing && secondRound){
+            } else if (e.getSource() == p1Check && playing && secondRound && !p2Turn){
                messageBox.setText("Player 1 checks.");
-               // p1.bet(0.5);
-               // potAmount += 0.5;
-               // pot.setText("$  " + potAmount);
-               // playerCash.setText("$  " + p1.getCash());
                p2Turn = true;
-            } else if (e.getSource() == p1Check && playing && finalRound){
+            } else if (e.getSource() == p1Check && playing && finalRound && !p2Turn){
                messageBox.setText("Player 1 checks.");
-               // p1.bet(0.5);
-               // potAmount += 0.5;
-               // pot.setText("$  " + potAmount);
-               // playerCash.setText("$  " + p1.getCash());
                p2Turn = true;
             } 
          }
       });
       p1Raise.addActionListener(new ActionListener(){
          public void actionPerformed(ActionEvent e){
-            if (e.getSource() == p1Raise && playing && p2hasRaised) {
+            if (e.getSource() == p1Raise && playing && p2hasRaised && !p2Turn) {
                messageBox.setText("Player 1 must call Player 2's raise or fold.");
-            } else if (e.getSource() == p1Raise && playing){
+            } else if (e.getSource() == p1Raise && playing && !p2Turn && firstRound && raising){
+               messageBox.setText("Player 1 raises \n$0.50.");
+               p1hasRaised = true;
+               p1.bet(0.5);
+               playerCash.setText("$  " + p1.getCash());
+               potAmount += 0.5;
+               pot.setText("$  " + potAmount);
+               p2Turn = true;
+            } else if (e.getSource() == p1Raise && playing && !p2Turn && firstRound){
+               messageBox.setText("Player 1 raises \n$1.00.");
+               p1hasRaised = true;
+               p1.bet(1);
+               playerCash.setText("$  " + p1.getCash());
+               potAmount += 1;
+               pot.setText("$  " + potAmount);
+               p2Turn = true;
+               raising = true;
+            } else if (e.getSource() == p1Raise && playing && !p2Turn && secondRound){
+               messageBox.setText("Player 1 raises \n$0.50.");
+               p1hasRaised = true;
+               p1.bet(0.5);
+               playerCash.setText("$  " + p1.getCash());
+               potAmount += 0.5;
+               pot.setText("$  " + potAmount);
+               p2Turn = true;
+            } else if (e.getSource() == p1Raise && playing && !p2Turn && finalRound){
                messageBox.setText("Player 1 raises \n$0.50.");
                p1hasRaised = true;
                p1.bet(0.5);
@@ -396,7 +421,7 @@ class PokerFrame extends JFrame{
       });
       p1Call.addActionListener(new ActionListener(){
          public void actionPerformed(ActionEvent e){
-            if (e.getSource() == p1Call && playing && p2hasRaised) {
+            if (e.getSource() == p1Call && playing && p2hasRaised && !p2Turn) {
                messageBox.setText("Player 1 calls Player 2's raise for $0.50.");
                p2hasRaised = false;
                p1hasCalled = true;
@@ -410,7 +435,7 @@ class PokerFrame extends JFrame{
       });
       p1Fold.addActionListener(new ActionListener(){
          public void actionPerformed(ActionEvent e){
-            if (e.getSource() == p1Fold && playing) {
+            if (e.getSource() == p1Fold && playing && !p2Turn) {
                p1hasFolded = true;
                p2Turn = true;
                if (p1hasFolded){
@@ -441,10 +466,6 @@ class PokerFrame extends JFrame{
                      if (e.getSource() == p2Check && playing && p2Turn && p1hasCalled && firstRound){
                         p1hasCalled = false;
                         messageBox.setText("Player 2 GO");
-                        // p2.bet(0.5);
-                        // opponentCash.setText("$  " + p2.getCash());
-                        // potAmount += 1;
-                        // pot.setText("$  " + potAmount);
                         messageBox.setText("Dealer deals 4th\ncard.");
                         deck4thCard.setVisible(true);
                         p2Turn = false;
@@ -455,10 +476,6 @@ class PokerFrame extends JFrame{
                      } else if (e.getSource() == p2Check && playing && p2Turn && firstRound){
                         p1hasCalled = false;
                         messageBox.setText("Player 2 GO");
-                        // p2.bet(0.5);
-                        // opponentCash.setText("$  " + p2.getCash());
-                        // potAmount += 1;
-                        // pot.setText("$  " + potAmount);
                         messageBox.setText("Dealer deals 4th\ncard.");
                         deck4thCard.setVisible(true);
                         p2Turn = false;
@@ -466,11 +483,6 @@ class PokerFrame extends JFrame{
                         secondRound = true;
                      } else if (e.getSource() == p2Check && playing && p2Turn && secondRound){
                         p1hasCalled = false;
-                        messageBox.setText("Player 2 GO");
-                        // p2.bet(0.5);
-                        // opponentCash.setText("$  " + p2.getCash());
-                        // potAmount += 1;
-                        // pot.setText("$  " + potAmount);
                         messageBox.setText("Dealer deals 5th\ncard.");
                         deck5thCard.setVisible(true);
                         p2Turn = false;
@@ -479,10 +491,6 @@ class PokerFrame extends JFrame{
                      } else if (e.getSource() == p2Check && playing && p2Turn && finalRound){
                         p1hasCalled = false;
                         messageBox.setText("Player 2 GO");
-                        // p2.bet(0.5);
-                        // opponentCash.setText("$  " + p2.getCash());
-                        // potAmount += 1;
-                        // pot.setText("$  " + potAmount);
                         if (p1.getBestHand().compareTo(p2.getBestHand()) == 1){
                            messageBox.setText("PLAYER 1 WON with a " + p1.getBestHand() + "!");
                            p1.changeCash(potAmount);
@@ -497,15 +505,15 @@ class PokerFrame extends JFrame{
                         playing = false;
                         p2Turn = false;
                         finalRound = false;;
-                     } else if (p1hasRaised && playing){
+                     } else if (p1hasRaised && playing && p2Turn){
                         messageBox.setText("Player 2 must raise or fold.");
                      }
       }});
       p2Raise.addActionListener(new ActionListener(){
          public void actionPerformed(ActionEvent e){
-            if (e.getSource() == p2Raise && playing && p1hasRaised) {
+            if (e.getSource() == p2Raise && playing && p2Turn && p1hasRaised) {
                messageBox.setText("Player 2 must call Player 1's raise or fold.");
-            } else if (e.getSource() == p2Raise && playing){
+            } else if (e.getSource() == p2Raise && playing && p2Turn){
                messageBox.setText("Player 2 raises \n$0.50.");
                p2hasRaised = true;
                p2.bet(0.5);
@@ -518,11 +526,29 @@ class PokerFrame extends JFrame{
       });
       p2Call.addActionListener(new ActionListener(){
          public void actionPerformed(ActionEvent e){
-            if (e.getSource() == p2Call && playing && p1hasRaised) {
+            if (e.getSource() == p2Call && playing && p2Turn && p1hasRaised && firstRound){
                messageBox.setText("Player 2 calls Player 1's raise for $0.50.");
                p1hasRaised = false;
                p2hasCalled = true;
-               p1.bet(0.5);
+               p2.bet(0.5);
+               opponentCash.setText("$  " + p2.getCash());
+               potAmount += 0.5;
+               pot.setText("$  " + potAmount);
+               p2Turn = false;
+            } else if (e.getSource() == p2Call && playing && p2Turn && p1hasRaised && secondRound){
+               messageBox.setText("Player 2 calls Player 1's raise for $0.50.");
+               p1hasRaised = false;
+               p2hasCalled = true;
+               p2.bet(0.5);
+               opponentCash.setText("$  " + p2.getCash());
+               potAmount += 0.5;
+               pot.setText("$  " + potAmount);
+               p2Turn = false;
+            } else if (e.getSource() == p2Call && playing && p2Turn && p1hasRaised && finalRound){
+               messageBox.setText("Player 2 calls Player 1's raise for $0.50.");
+               p1hasRaised = false;
+               p2hasCalled = true;
+               p2.bet(0.5);
                opponentCash.setText("$  " + p2.getCash());
                potAmount += 0.5;
                pot.setText("$  " + potAmount);
@@ -532,7 +558,7 @@ class PokerFrame extends JFrame{
       });
       p2Fold.addActionListener(new ActionListener(){
          public void actionPerformed(ActionEvent e){
-            if (e.getSource() == p2Fold && playing) {
+            if (e.getSource() == p2Fold && p2Turn && playing) {
                p2hasFolded = true;
                p2Turn = false;
                if (p2hasFolded){
