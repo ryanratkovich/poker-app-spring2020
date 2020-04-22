@@ -55,19 +55,13 @@ class PokerFrame extends JFrame{
    private JTextField playerCash;
 
    //array to access card image files
-   private String files[] = {
-      "2C.png", "2D.png", "2H.png", "2S.png",
-      "3C.png", "3D.png", "3H.png", "3S.png",
-      "4C.png", "4D.png", "4H.png", "4S.png",
-      "5C.png", "5D.png", "5H.png", "5S.png",
-      "6C.png", "6D.png", "6H.png", "6S.png",
-      "7C.png", "7D.png", "7H.png", "7S.png",
-      "8C.png", "8D.png", "8H.png", "8S.png",
-      "9C.png", "9D.png", "9H.png", "9S.png",
-      "10C.png", "10D.png", "10H.png", "10S.png",
-      "JC.png", "JD.png", "JH.png", "JS.png",
-      "QC.png", "QD.png", "QH.png", "QS.png",
-      "KC.png", "KD.png", "KH.png", "KS.png",
+   private String files[] = { 
+      "2C.png", "2D.png", "2H.png", "2S.png", "3C.png", "3D.png", "3H.png", "3S.png",
+      "4C.png", "4D.png", "4H.png", "4S.png", "5C.png", "5D.png", "5H.png", "5S.png",
+      "6C.png", "6D.png", "6H.png", "6S.png", "7C.png", "7D.png", "7H.png", "7S.png",
+      "8C.png", "8D.png", "8H.png", "8S.png", "9C.png", "9D.png", "9H.png", "9S.png",
+      "10C.png", "10D.png", "10H.png", "10S.png", "JC.png", "JD.png", "JH.png", "JS.png",
+      "QC.png", "QD.png", "QH.png", "QS.png", "KC.png", "KD.png", "KH.png", "KS.png",
       "AC.png", "AD.png", "AH.png", "AS.png"
    };
 
@@ -75,60 +69,7 @@ class PokerFrame extends JFrame{
    private ImageIcon hiddenCard = new ImageIcon(getClass().getResource("gray_back.png"));
 
    //array to hold images of cards
-   private ImageIcon icons[] = { 
-      new ImageIcon(getClass().getResource(files[0])),
-      new ImageIcon(getClass().getResource(files[1])), 
-      new ImageIcon(getClass().getResource(files[2])),
-      new ImageIcon(getClass().getResource(files[3])),
-      new ImageIcon(getClass().getResource(files[4])),
-      new ImageIcon(getClass().getResource(files[5])), 
-      new ImageIcon(getClass().getResource(files[6])),
-      new ImageIcon(getClass().getResource(files[7])),
-      new ImageIcon(getClass().getResource(files[8])),
-      new ImageIcon(getClass().getResource(files[9])), 
-      new ImageIcon(getClass().getResource(files[10])),
-      new ImageIcon(getClass().getResource(files[11])),
-      new ImageIcon(getClass().getResource(files[12])),
-      new ImageIcon(getClass().getResource(files[13])), 
-      new ImageIcon(getClass().getResource(files[14])),
-      new ImageIcon(getClass().getResource(files[15])),
-      new ImageIcon(getClass().getResource(files[16])),
-      new ImageIcon(getClass().getResource(files[17])), 
-      new ImageIcon(getClass().getResource(files[18])),
-      new ImageIcon(getClass().getResource(files[19])),
-      new ImageIcon(getClass().getResource(files[20])),
-      new ImageIcon(getClass().getResource(files[21])), 
-      new ImageIcon(getClass().getResource(files[22])),
-      new ImageIcon(getClass().getResource(files[23])),
-      new ImageIcon(getClass().getResource(files[24])),
-      new ImageIcon(getClass().getResource(files[25])), 
-      new ImageIcon(getClass().getResource(files[26])),
-      new ImageIcon(getClass().getResource(files[27])),
-      new ImageIcon(getClass().getResource(files[28])),
-      new ImageIcon(getClass().getResource(files[29])), 
-      new ImageIcon(getClass().getResource(files[30])),
-      new ImageIcon(getClass().getResource(files[31])),
-      new ImageIcon(getClass().getResource(files[32])),
-      new ImageIcon(getClass().getResource(files[33])), 
-      new ImageIcon(getClass().getResource(files[34])),
-      new ImageIcon(getClass().getResource(files[35])),
-      new ImageIcon(getClass().getResource(files[36])),
-      new ImageIcon(getClass().getResource(files[37])), 
-      new ImageIcon(getClass().getResource(files[38])),
-      new ImageIcon(getClass().getResource(files[39])),
-      new ImageIcon(getClass().getResource(files[40])),
-      new ImageIcon(getClass().getResource(files[41])), 
-      new ImageIcon(getClass().getResource(files[42])),
-      new ImageIcon(getClass().getResource(files[43])),
-      new ImageIcon(getClass().getResource(files[44])),
-      new ImageIcon(getClass().getResource(files[45])), 
-      new ImageIcon(getClass().getResource(files[46])),
-      new ImageIcon(getClass().getResource(files[47])),
-      new ImageIcon(getClass().getResource(files[48])),
-      new ImageIcon(getClass().getResource(files[49])), 
-      new ImageIcon(getClass().getResource(files[50])),
-      new ImageIcon(getClass().getResource(files[51]))
-   };
+   private ImageIcon icons[] = new ImageIcon[52];
 
    private JPanel southPanel = new JPanel(); //panel to hold player 1's button panel
    private JPanel p1ButtonPanel = new JPanel();
@@ -156,6 +97,9 @@ class PokerFrame extends JFrame{
 
    public PokerFrame() {
       super( "Texas Hold'em" );
+
+      for(int i = 0; i < 52; i++)
+         icons[i] = new ImageIcon(getClass().getResource(files[i]));
 
       playing = true;   //game is being played
       firstRound = true;   //first round
@@ -192,21 +136,21 @@ class PokerFrame extends JFrame{
       opponentCash = new JTextField("$  " + p2.getCash());
       opponentCash.setEditable(false);
       opponentPanel.add(opponentCash, BorderLayout.EAST);
-      opponentPanel.setBackground(Color.green);
+      opponentPanel.setBackground(new Color(0, 175, 0));
 
       cardPanel.setBorder(BorderFactory.createLineBorder(Color.black));
       cardPanel.add(new JLabel("Deck"), BorderLayout.WEST);
       pot = new JTextField("$  " + potAmount);
       pot.setEditable(false);
       cardPanel.add(pot);
-      cardPanel.setBackground(Color.green);
+      cardPanel.setBackground(new Color(0, 175, 0));
 
       playerPanel.setBorder(BorderFactory.createLineBorder(Color.black));
       playerPanel.add(new JLabel("Player 1"), BorderLayout.WEST);
       playerCash = new JTextField("$  " + p1.getCash());
       playerCash.setEditable(false);
       playerPanel.add(playerCash, BorderLayout.EAST);
-      playerPanel.setBackground(Color.green);
+      playerPanel.setBackground(new Color(0, 175, 0));
 
       northPanel.setBorder(BorderFactory.createLineBorder(Color.black));
       p2ButtonPanel.setBorder(BorderFactory.createLineBorder(Color.black));  
@@ -347,7 +291,8 @@ class PokerFrame extends JFrame{
       Card c5 = d.deal();
 
       //DISPLAY THE FLOP
-      JLabel deck1stCard = new JLabel();                                                 //DISPLAY 1ST CARD
+       
+      JLabel deck1stCard = new JLabel();                                                //DISPLAY 1ST CARD
       image = icons[c1.getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
@@ -514,7 +459,6 @@ class PokerFrame extends JFrame{
                         finalRound = false;;
                      }
       }});
-
    //    p2Check.addActionListener(new ActionListener(){
    //       public void actionPerformed(ActionEvent e){
    //          if (e.getSource() == p2Check) {
@@ -708,6 +652,6 @@ class PokerFrame extends JFrame{
    //             }
    //          }
    //       }
-   //    }
+   //    } 
    }
 } //end class
