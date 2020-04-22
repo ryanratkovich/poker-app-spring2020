@@ -200,8 +200,7 @@ public class Hand {
 			case 9:		return "Straight Flush";
 			case 10:	return "...a Royal Flush??!!??!!";
 		}
-
-		return ranks[this.rank] + suits[this.suit];
+		return "";
 	}
 
 }
