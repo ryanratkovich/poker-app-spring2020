@@ -448,10 +448,10 @@ class PokerFrame extends JFrame{
                         pot.setText("$  " + potAmount);
 
                         if (p1.getBestHand().compareTo(p2.getBestHand()) == 1){
-                           messageBox.setText("PLAYER 1 WON!");
+                           messageBox.setText("PLAYER 1 WON with a " + p1.getBestHand() + "!");
                            p1.changeCash(potAmount);
                         } else {
-                           messageBox.setText("PLAYER 2 WON!");
+                           messageBox.setText("PLAYER 2 WON with a " + p1.getBestHand() + "!");
                            p2.changeCash(potAmount);
                         }
                         potAmount = 0;
