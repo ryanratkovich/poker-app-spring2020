@@ -9,6 +9,9 @@ public class Hand {
 		this.hand = new Card[this.size];
 		this.val = new int[6];
 
+		for(int i = 0; i < 6; i++)
+			val[i] = 0;
+
 		for(int i = 0; i < this.size; i++)
 			hand[i] = new Card(h[i].getRank(), h[i].getSuit());	
 
@@ -132,7 +135,7 @@ public class Hand {
 		for(int i = 0; i < 6; i++) {
 			if(this.val[i] > h.val[i])
 				return 1;
-			else if(this.val[i] != h.val[i])
+			else if(this.val[i] < h.val[i])
 				return -1;
 		}
 		return 0;
