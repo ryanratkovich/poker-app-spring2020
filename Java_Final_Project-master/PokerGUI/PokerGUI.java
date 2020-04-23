@@ -6,7 +6,7 @@ public class PokerGUI extends JFrame {
    public static void main(String args[]){ 
       PokerFrame pokerFrame = new PokerFrame(); 
       pokerFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      pokerFrame.setSize(800, 500);
+      pokerFrame.setSize(850, 500);
       pokerFrame.setVisible(true);
    }
 }
@@ -56,6 +56,12 @@ class PokerFrame extends JFrame{
    private JLabel[] playerCards;
    private JTextField playerCash;
 
+   //Doubles and JLabels for raising
+   private Double playerRaiseAmount;
+   private JTextField playerRaise;
+   private Double opponentRaiseAmount;
+   private JTextField opponentRaise;
+
    //array to access card image files
    private String files[] = { 
       "Images/2C.png", "Images/2D.png", "Images/2H.png", "Images/2S.png", "Images/3C.png", 
@@ -95,11 +101,18 @@ class PokerFrame extends JFrame{
    private JButton p2Fold = new JButton("Fold");
 
    //button to play again
-   //private JButton playAgain = new JButton("Play Again");
+   private JButton playAgain = new JButton("Play Again");
 
    //create players
    private Player p1;
    private Player p2;
+
+   //JLabels for cards
+   private JLabel deck1stCard;
+   private JLabel deck2ndCard;
+   private JLabel deck3rdCard;
+   private JLabel deck4thCard;
+   private JLabel deck5thCard;
 
    public PokerFrame() {
       super( "Texas Hold'em" );
@@ -115,6 +128,8 @@ class PokerFrame extends JFrame{
       p2 = new Player("player 2", 10);
 
       potAmount = 0; //pot is intially 0
+      playerRaiseAmount = 0.0;
+      opponentRaiseAmount = 0.0;
 
       //initialze game logic booleans
       p1hasChecked = false;
@@ -147,7 +162,7 @@ class PokerFrame extends JFrame{
       opponentPanel.setBackground(new Color(0, 175, 0));
 
       cardPanel.setBorder(BorderFactory.createLineBorder(Color.black));
-      cardPanel.add(new JLabel("Deck"), BorderLayout.WEST);
+      cardPanel.add(new JLabel("Pot"), BorderLayout.WEST);
       pot = new JTextField("$  " + potAmount);
       pot.setEditable(false);
       cardPanel.add(pot);
@@ -179,7 +194,6 @@ class PokerFrame extends JFrame{
       p1ButtonPanel.add(p1Call);
       p1ButtonPanel.add(p1Raise);
       p1ButtonPanel.add(p1Fold);
-      //p1ButtonPanel.add(playAgain);
       southPanel.add(p1ButtonPanel, BorderLayout.EAST); //add p1ButtonPanel to southPanel
 
       p2ButtonPanel.add(p2Check);
@@ -246,6 +260,11 @@ class PokerFrame extends JFrame{
       });
       playerPanel.add(p1Card2);
 
+      playerPanel.add(new JLabel("Raise"), BorderLayout.WEST);
+      playerRaise = new JTextField("$" + playerRaiseAmount);
+      playerRaise.setEditable(false);
+      playerPanel.add(playerRaise, BorderLayout.WEST);
+
       //DISPLAY OPPONENT CARDS
       JLabel p2Card1 = new JLabel();
       image = hiddenCard.getImage();
@@ -289,6 +308,12 @@ class PokerFrame extends JFrame{
       });
       opponentPanel.add(p2Card2);
 
+      opponentPanel.add(new JLabel("Raise"), BorderLayout.WEST);
+      opponentRaise = new JTextField("$" + opponentRaiseAmount);
+      opponentRaise.setEditable(false);
+      opponentPanel.add(opponentRaise, BorderLayout.WEST);
+
+
       //DEALER DEALS 3 CARDS
       Card c1 = d.deal();
       Card c2 = d.deal();
@@ -300,21 +325,21 @@ class PokerFrame extends JFrame{
 
       //DISPLAY THE FLOP
        
-      JLabel deck1stCard = new JLabel();                                                //DISPLAY 1ST CARD
+      deck1stCard = new JLabel();                                                //DISPLAY 1ST CARD
       image = icons[c1.getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
       deck1stCard.setIcon(imageIcon);
       cardPanel.add(deck1stCard);
 
-      JLabel deck2ndCard = new JLabel();                                                 //DISPLAY 2ND CARD
+      deck2ndCard = new JLabel();                                                 //DISPLAY 2ND CARD
       image = icons[c2.getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
       deck2ndCard.setIcon(imageIcon);
       cardPanel.add(deck2ndCard);
 
-      JLabel deck3rdCard = new JLabel();                                                  //DISPLAY 3RD CARD
+      deck3rdCard = new JLabel();                                                  //DISPLAY 3RD CARD
       image = icons[c3.getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
@@ -323,7 +348,7 @@ class PokerFrame extends JFrame{
 
       //RIVER CARDS (HIDDEN INITIALLY)
 
-      JLabel deck4thCard = new JLabel();
+      deck4thCard = new JLabel();
       image = icons[c4.getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
@@ -331,7 +356,7 @@ class PokerFrame extends JFrame{
       deck4thCard.setVisible(false);
       cardPanel.add(deck4thCard);
 
-      JLabel deck5thCard = new JLabel();
+      deck5thCard = new JLabel();
       image = icons[c5.getID()].getImage();
       newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
       imageIcon = new ImageIcon(newimg); 
@@ -352,6 +377,111 @@ class PokerFrame extends JFrame{
       pot.setText("$  " + potAmount);
       playerCash.setText("$  " + p1.getCash());
       opponentCash.setText("$  " + p2.getCash());
+
+      playAgain.addActionListener(new ActionListener(){
+         public void actionPerformed(ActionEvent e){
+            if (e.getSource() == playAgain) {
+            	p1ButtonPanel.remove(playAgain);
+            	if (p1.getCash() != 0 && p2.getCash() != 0){
+            	   messageBox.setText("Deck shuffled. Player 1 GO");
+	               playing = true;
+	               firstRound = true;
+	               secondRound = false;
+	               finalRound = false;
+	               potAmount = 0;
+	               pot.setText("$  " + potAmount);
+			       playerRaiseAmount = 0.0;
+			       playerRaise.setText("$" + playerRaiseAmount);
+			       opponentRaiseAmount = 0.0;
+			       opponentRaise.setText("$" + opponentRaiseAmount);
+			       p1hasChecked = false;
+			       p1hasCalled = false;
+			       p1hasRaised = false;
+			       p1hasFolded = false;
+			       p2Turn = false;
+			       p2hasChecked = false;
+			       p2hasCalled = false;
+			       p2hasRaised = false;
+			       p2hasFolded = false;
+			       raising = false;
+
+			       Deck d = new Deck();
+			       d.shuffle();
+
+			       Card [] p1Cards = {d.deal(), d.deal()};
+			       Card [] p2Cards = {d.deal(), d.deal()};
+			       p1.setStartCards(p1Cards);
+			       p2.setStartCards(p2Cards);
+
+			       Card c1 = d.deal();
+			       Card c2 = d.deal();
+			       Card c3 = d.deal();
+			       Card c4 = d.deal();
+			       Card c5 = d.deal();
+
+			       cardPanel.remove(deck1stCard);
+			       cardPanel.remove(deck2ndCard);
+			       cardPanel.remove(deck3rdCard);
+			       cardPanel.remove(deck4thCard);
+			       cardPanel.remove(deck5thCard);
+			       cardPanel.invalidate();
+			       cardPanel.validate();
+
+			      deck1stCard = new JLabel();                                                //DISPLAY 1ST CARD
+			      Image image = icons[c1.getID()].getImage();
+			      Image newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+			      ImageIcon imageIcon = new ImageIcon(newimg); 
+			      deck1stCard.setIcon(imageIcon);
+			      cardPanel.add(deck1stCard);
+
+			      deck2ndCard = new JLabel();                                                 //DISPLAY 2ND CARD
+			      image = icons[c2.getID()].getImage();
+			      newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+			      imageIcon = new ImageIcon(newimg); 
+			      deck2ndCard.setIcon(imageIcon);
+			      cardPanel.add(deck2ndCard);
+
+			      deck3rdCard = new JLabel();                                                  //DISPLAY 3RD CARD
+			      image = icons[c3.getID()].getImage();
+			      newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+			      imageIcon = new ImageIcon(newimg); 
+			      deck3rdCard.setIcon(imageIcon);
+			      cardPanel.add(deck3rdCard);
+
+			      deck4thCard = new JLabel();
+			      image = icons[c4.getID()].getImage();
+			      newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+			      imageIcon = new ImageIcon(newimg); 
+			      deck4thCard.setIcon(imageIcon);
+			      deck4thCard.setVisible(false);
+			      cardPanel.add(deck4thCard);
+
+			      deck5thCard = new JLabel();
+			      image = icons[c5.getID()].getImage();
+			      newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH);
+			      imageIcon = new ImageIcon(newimg); 
+			      deck5thCard.setIcon(imageIcon);
+			      deck5thCard.setVisible(false);
+			      cardPanel.add(deck5thCard);
+
+			       Card [] tableCards = {c1, c2, c3, c4, c5};
+
+			       p1.storeHands(tableCards, 5);
+			       p2.storeHands(tableCards, 5);
+
+			       p1.bet(0.5);
+			       p2.bet(1);
+			       potAmount += 1.50;
+			       pot.setText("$  " + potAmount);
+			       playerCash.setText("$  " + p1.getCash());
+			       opponentCash.setText("$  " + p2.getCash());
+
+            	} else {
+            		messageBox.setText("GAME OVER! \nRESTART THE\nAPPLICATION\nTO PLAY\nA NEW GAME.");
+            	}
+            }
+         }
+      });
 
       messageBox.setText("Player 1 GO");
 
@@ -385,6 +515,8 @@ class PokerFrame extends JFrame{
                messageBox.setText("Player 1 must call Player 2's raise or fold.");
             } else if (e.getSource() == p1Raise && playing && !p2Turn && firstRound && raising){
                messageBox.setText("Player 1 raises \n$0.50.");
+               playerRaiseAmount += 0.50;
+               playerRaise.setText("$" + playerRaiseAmount);
                p1hasRaised = true;
                p1.bet(0.5);
                playerCash.setText("$  " + p1.getCash());
@@ -393,6 +525,8 @@ class PokerFrame extends JFrame{
                p2Turn = true;
             } else if (e.getSource() == p1Raise && playing && !p2Turn && firstRound){
                messageBox.setText("Player 1 raises \n$1.00.");
+               playerRaiseAmount += 1;
+               playerRaise.setText("$" + playerRaiseAmount);
                p1hasRaised = true;
                p1.bet(1);
                playerCash.setText("$  " + p1.getCash());
@@ -402,6 +536,8 @@ class PokerFrame extends JFrame{
                raising = true;
             } else if (e.getSource() == p1Raise && playing && !p2Turn && secondRound){
                messageBox.setText("Player 1 raises \n$0.50.");
+               playerRaiseAmount += 0.50;
+               playerRaise.setText("$" + playerRaiseAmount);
                p1hasRaised = true;
                p1.bet(0.5);
                playerCash.setText("$  " + p1.getCash());
@@ -410,6 +546,8 @@ class PokerFrame extends JFrame{
                p2Turn = true;
             } else if (e.getSource() == p1Raise && playing && !p2Turn && finalRound){
                messageBox.setText("Player 1 raises \n$0.50.");
+               playerRaiseAmount += 0.50;
+               playerRaise.setText("$" + playerRaiseAmount);
                p1hasRaised = true;
                p1.bet(0.5);
                playerCash.setText("$  " + p1.getCash());
@@ -423,6 +561,8 @@ class PokerFrame extends JFrame{
          public void actionPerformed(ActionEvent e){
             if (e.getSource() == p1Call && playing && p2hasRaised && !p2Turn) {
                messageBox.setText("Player 1 calls Player 2's raise for $0.50.");
+               playerRaiseAmount += 0.50;
+               playerRaise.setText("$" + playerRaiseAmount);
                p2hasRaised = false;
                p1hasCalled = true;
                p1.bet(0.5);
@@ -435,6 +575,10 @@ class PokerFrame extends JFrame{
       });
       p1Fold.addActionListener(new ActionListener(){
          public void actionPerformed(ActionEvent e){
+         	opponentRaiseAmount = 0.0;
+            playerRaiseAmount = 0.0;
+            opponentRaise.setText("$" + opponentRaiseAmount);
+            playerRaise.setText("$" + playerRaiseAmount);
             if (e.getSource() == p1Fold && playing && !p2Turn) {
                p1hasFolded = true;
                p2Turn = true;
@@ -449,20 +593,16 @@ class PokerFrame extends JFrame{
                   secondRound = false;
                   finalRound = false;
                }
+            p1ButtonPanel.add(playAgain);
             }
          }
       });
-
-      // playAgain.addActionListener(new ActionListener(){
-      //    public void actionPerformed(ActionEvent e){
-      //       if (e.getSource() == playAgain) {
-      //          messageBox.setText("Player 1 GO");
-      //          playing = true;
-      //       }
-      //    }
-      // });
       p2Check.addActionListener(new ActionListener(){
                   public void actionPerformed(ActionEvent e){
+                  	 opponentRaiseAmount = 0.0;
+                  	 playerRaiseAmount = 0.0;
+                  	 opponentRaise.setText("$" + opponentRaiseAmount);
+            		 playerRaise.setText("$" + playerRaiseAmount);
                      if (e.getSource() == p2Check && playing && p2Turn && p1hasCalled && firstRound){
                         p1hasCalled = false;
                         messageBox.setText("Player 2 GO");
@@ -511,9 +651,10 @@ class PokerFrame extends JFrame{
                         opponentCash.setText("$  " + p2.getCash());
                         playerCash.setText("$  " + p1.getCash());
                         pot.setText("$  " + potAmount);
+                        p1ButtonPanel.add(playAgain);
                         playing = false;
                         p2Turn = false;
-                        finalRound = false;;
+                        finalRound = false;
                      } else if (p1hasRaised && playing && p2Turn){
                         messageBox.setText("Player 2 must raise or fold.");
                      }
@@ -524,6 +665,8 @@ class PokerFrame extends JFrame{
                messageBox.setText("Player 2 must call Player 1's raise or fold.");
             } else if (e.getSource() == p2Raise && playing && p2Turn){
                messageBox.setText("Player 2 raises \n$0.50.");
+               opponentRaiseAmount += 0.50;
+               opponentRaise.setText("$" + opponentRaiseAmount);
                p2hasRaised = true;
                p2.bet(0.5);
                opponentCash.setText("$  " + p2.getCash());
@@ -537,6 +680,8 @@ class PokerFrame extends JFrame{
          public void actionPerformed(ActionEvent e){
             if (e.getSource() == p2Call && playing && p2Turn && p1hasRaised && firstRound){
                messageBox.setText("Player 2 calls Player 1's raise for $0.50.");
+               opponentRaiseAmount += 0.50;
+               opponentRaise.setText("$" + opponentRaiseAmount);
                p1hasRaised = false;
                p2hasCalled = true;
                p2.bet(0.5);
@@ -546,6 +691,8 @@ class PokerFrame extends JFrame{
                p2Turn = false;
             } else if (e.getSource() == p2Call && playing && p2Turn && p1hasRaised && secondRound){
                messageBox.setText("Player 2 calls Player 1's raise for $0.50.");
+               opponentRaiseAmount += 0.50;
+               opponentRaise.setText("$" + opponentRaiseAmount);
                p1hasRaised = false;
                p2hasCalled = true;
                p2.bet(0.5);
@@ -555,6 +702,8 @@ class PokerFrame extends JFrame{
                p2Turn = false;
             } else if (e.getSource() == p2Call && playing && p2Turn && p1hasRaised && finalRound){
                messageBox.setText("Player 2 calls Player 1's raise for $0.50.");
+               opponentRaiseAmount += 0.50;
+               opponentRaise.setText("$" + opponentRaiseAmount);
                p1hasRaised = false;
                p2hasCalled = true;
                p2.bet(0.5);
@@ -567,6 +716,10 @@ class PokerFrame extends JFrame{
       });
       p2Fold.addActionListener(new ActionListener(){
          public void actionPerformed(ActionEvent e){
+         	opponentRaiseAmount = 0.0;
+            playerRaiseAmount = 0.0;
+            opponentRaise.setText("$" + opponentRaiseAmount);
+            playerRaise.setText("$" + playerRaiseAmount);
             if (e.getSource() == p2Fold && p2Turn && playing) {
                p2hasFolded = true;
                p2Turn = false;
@@ -581,8 +734,9 @@ class PokerFrame extends JFrame{
                   secondRound = false;
                   finalRound = false;
                }
+            p1ButtonPanel.add(playAgain);
             }
          }
-      }); 
+      });
    }
 } //end class
