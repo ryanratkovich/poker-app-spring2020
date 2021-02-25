@@ -1,5 +1,5 @@
 # Java_Final_Project
-All code and assets for a Java Poker game.
+For my Advanced Programming with Java class, a teammate and I developed a Texas Hold'em Poker game with a GUI.
 
 - Using the GUI:
 	- When it is a players turn, the players buttons will be enabled
